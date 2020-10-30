@@ -243,8 +243,8 @@ public class TechbotHardware {
         //servoHand = hwMap.get(Servo.class, "hand");
         touchSensor1 = hwMap.touchSensor.get("touchSensor1");
         touchSensor2 = hwMap.touchSensor.get("touchSensor2");
-        wobbleClamp = hwMap.get(Servo.class, "wobbleClamp");
-        wobbleLift = hwMap.get(Servo.class,"wobbleLift");
+        wobbleLift = hwMap.get(Servo.class, "wobbleLift");
+        wobbleClamp = hwMap.get(Servo.class,"wobbleClamp");
 
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -277,7 +277,6 @@ public class TechbotHardware {
        // fervoR.setPosition(MID_SERVO);
         //servoWrist.setPosition(MID_SERVO);
         wobbleClamp.setPosition(MID_SERVO);
-        wobbleLift.setPosition(MID_SERVO);
     }
  }
 

@@ -118,17 +118,17 @@ public class TerryTeleOp2021 extends LinearOpMode {
             spinPowerCW = -gamepad1.left_trigger;
 
             if (gamepad2.b) {
+                Terry.wobbleClamp.setPosition(-0.5);
+            }
+            else {
+                Terry.wobbleClamp.setPosition(0.3);
+            }
+
+            if (gamepad2.right_bumper) {
                 Terry.wobbleLift.setPosition(0);
             }
             else {
                 Terry.wobbleLift.setPosition(0.5);
-            }
-
-            if (gamepad2.right_bumper) {
-                Terry.wobbleClamp.setPosition(0);
-            }
-            else {
-                Terry.wobbleClamp.setPosition(0.5);
             }
 
 
