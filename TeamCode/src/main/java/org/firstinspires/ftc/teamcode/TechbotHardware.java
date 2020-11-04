@@ -58,6 +58,7 @@ public class TechbotHardware {
     public DcMotor rightDrive = null;
     public DcMotor leftBackDrive = null;
     public DcMotor rightBackDrive = null;
+    public DcMotor wobbleArmDrive = null;
     //public DcMotor farm = null;
 
     // Touch sensors
@@ -68,7 +69,6 @@ public class TechbotHardware {
     //public Servo fervoL = null;
     //public Servo fervoR = null;
     public Servo wobbleClamp = null;
-    public Servo wobbleLift = null;
 
     public ElapsedTime runtime;
     //public Servo servoWrist = null;
@@ -239,17 +239,18 @@ public class TechbotHardware {
         rightDrive = hwMap.get(DcMotor.class, "Right front motor");
         leftBackDrive = hwMap.get(DcMotor.class, "Left back motor");
         rightBackDrive = hwMap.get(DcMotor.class, "Right back motor");
+        wobbleArmDrive = hwMap.get(DcMotor.class,"wobbleArm");
         //farm = hwMap.get(DcMotor.class, "foundation motor");
         //servoHand = hwMap.get(Servo.class, "hand");
         touchSensor1 = hwMap.touchSensor.get("touchSensor1");
         touchSensor2 = hwMap.touchSensor.get("touchSensor2");
-        wobbleLift = hwMap.get(Servo.class, "wobbleLift");
         wobbleClamp = hwMap.get(Servo.class,"wobbleClamp");
 
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        wobbleArmDrive.setDirection(DcMotor.Direction.FORWARD);
         //farm.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power

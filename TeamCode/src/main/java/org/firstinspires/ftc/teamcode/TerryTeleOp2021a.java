@@ -51,7 +51,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="TerryTeleOp2021", group="Linear Opmode")
 //@Disabled
-public class TerryTeleOp2021 extends LinearOpMode {
+public class TerryTeleOp2021a extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -88,31 +88,28 @@ public class TerryTeleOp2021 extends LinearOpMode {
             double spinPowerCW;
             double driveSPower;
 
-            // Other motors
-            double wobbleArmPower;
-
 
             // Touch Sensors
             String touchSensorValue;
-            if(Terry.touchSensor2.isPressed()) {
-                telemetry.addData("touchSensor2", "Pressed");
+            if(Terry.touchSensor1.isPressed()) {
+                touchSensorValue = "Pressed";
             } else {
-                telemetry.addData("touchSensor2", "Not Pressed");
+                touchSensorValue = "Not Pressed";
             }
+            telemetry.addData("touchSensor1", touchSensorValue);
             telemetry.update();
 
-            //String touchSersor2String;
-            /*if(Terry.touchSensor2.isPressed()) {
-                telemetry.addData("touchSensor2", "Pressed");
+            if(Terry.touchSensor2.isPressed()) {
+                touchSensorValue = "Pressed";
             } else {
-                telemetry.addData("touchSensor2", "Not Pressed");
+                touchSensorValue = "Not Pressed";
             }
+            telemetry.addData("touchSensor2", touchSensorValue);
             telemetry.update();
-*/
+
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
 
-            // Wheel related controls
             slidePower = gamepad1.right_stick_x;
             drivePower = gamepad1.right_stick_y;
             driveSPower = gamepad1.left_stick_y;
@@ -120,29 +117,13 @@ public class TerryTeleOp2021 extends LinearOpMode {
             slideSpower = gamepad1.left_stick_x;
             spinPowerCW = -gamepad1.left_trigger;
 
-            //Other motors
-            wobbleArmPower = gamepad2.left_trigger;
-
             if (gamepad2.b) {
-                Terry.tubeSpin.setPosition(0.25);
-            }
-            else {
-                Terry.tubeSpin.setPosition(-0.5);
-            }
-
-            if (gamepad2.right_bumper) {
                 Terry.wobbleClamp.setPosition(0);
             }
             else {
-                Terry.wobbleClamp.setPosition(0.5);
+                Terry.wobbleClamp.setPosition(1);
             }
 
-            if (gamepad2.a) {
-                Terry.liftSpin.setPosition(0);
-            }
-            else {
-                Terry.liftSpin.setPosition(0.5);
-            }
 
 
             // Send calculated power to wheels
@@ -162,7 +143,7 @@ public class TerryTeleOp2021 extends LinearOpMode {
             }
 
             if (gamepad2.left_trigger > 0.2 || gamepad2.left_trigger < - 0.2) {
-               Terry.wobbleArmDrive.setPower(0.5);
+                Terry.wobbleArmDrive.setPower(0.25);
             } else if (gamepad2.left_trigger < 0.2 && gamepad2.left_trigger > -0.2) {
                 Terry.wobbleArmDrive.setPower(0);
             }
@@ -187,7 +168,6 @@ public class TerryTeleOp2021 extends LinearOpMode {
             Terry.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
