@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -69,6 +70,8 @@ public class TechbotHardware {
     //public Servo fervoL = null;
     //public Servo fervoR = null;
     public Servo wobbleClamp = null;
+    public Servo tubeSpin = null;
+    public Servo liftSpin = null;
 
     public ElapsedTime runtime;
     //public Servo servoWrist = null;
@@ -244,7 +247,11 @@ public class TechbotHardware {
         //servoHand = hwMap.get(Servo.class, "hand");
         touchSensor1 = hwMap.touchSensor.get("touchSensor1");
         touchSensor2 = hwMap.touchSensor.get("touchSensor2");
+
+
         wobbleClamp = hwMap.get(Servo.class,"wobbleClamp");
+        tubeSpin = hwMap.get(Servo.class,"tubeSpin");
+        liftSpin = hwMap.get(Servo.class,"liftSpin");
 
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -278,6 +285,8 @@ public class TechbotHardware {
        // fervoR.setPosition(MID_SERVO);
         //servoWrist.setPosition(MID_SERVO);
         wobbleClamp.setPosition(MID_SERVO);
+        tubeSpin.setPosition(0.5);
+        liftSpin.setPosition(1);
     }
  }
 
