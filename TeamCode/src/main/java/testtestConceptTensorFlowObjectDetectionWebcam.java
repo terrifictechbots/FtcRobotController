@@ -54,6 +54,7 @@ public class testtestConceptTensorFlowObjectDetectionWebcam extends LinearOpMode
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
+    private TechbotHardware Terry = new TechbotHardware();
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -103,8 +104,9 @@ public class testtestConceptTensorFlowObjectDetectionWebcam extends LinearOpMode
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 1.78 or 16/9).
 
-            // Uncomment the following line if you want to adjust the magnification and/or the aspect ratio of the input images.
-            //tfod.setZoom(2.5, 1.78);
+
+            // This is the zoom line
+            tfod.setZoom(2.5, 1.78);
         }
 
         /** Wait for the game to begin */
@@ -131,6 +133,9 @@ public class testtestConceptTensorFlowObjectDetectionWebcam extends LinearOpMode
                         telemetry.addData(String.format("top (%d)", i), recognition.getTop());
                       }
                       telemetry.update();
+                      /*if (updatedRecognitions() = "Quad");
+                        Terry.autonomousTargetZoneC
+                                else if {recognition.getLabel () = "Single"; */
                     }
                 }
             }
@@ -159,6 +164,7 @@ public class testtestConceptTensorFlowObjectDetectionWebcam extends LinearOpMode
 
         // Loading trackables is not necessary for the TensorFlow Object Detection engine.
     }
+
 
     /**
      * Initialize the TensorFlow Object Detection engine.

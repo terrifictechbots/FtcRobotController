@@ -142,12 +142,25 @@ public class testtestConceptVuforiaUltimateGoalNavigationWebcam extends LinearOp
     private float phoneXRotate    = 0;
     private float phoneYRotate    = 0;
     private float phoneZRotate    = 0;
+    private float frontWallTarget       = 0;
+
+    // Motors
+    private double leftDrive      = 0;
+    private double rightDrive     = 0;
+    private double leftBackDrive  = 0;
+    private double rightBackDrive = 0;
 
     @Override public void runOpMode() {
         /*
          * Retrieve the camera we are to use.
          */
         webcamName = hardwareMap.get(WebcamName.class, "camera");
+
+        // Motors
+        leftDrive = hardwareMap.get(double.class, "leftdrive");
+        rightDrive = hardwareMap.get(double.class, "rightDrive");
+        leftBackDrive = hardwareMap.get(double.class, "leftBackDrive");
+        rightBackDrive = hardwareMap.get(double.class, "rightBackDrive");
 
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
