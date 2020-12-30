@@ -169,7 +169,7 @@ public class Rings_Auto2 extends LinearOpMode {
 
         // Object detection code
         if (opModeIsActive()) {
-            while (opModeIsActive()) {
+            for (int repeatDetection = 0; repeatDetection < 10; repeatDetection ++) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -196,6 +196,10 @@ public class Rings_Auto2 extends LinearOpMode {
             }
         }
 
+        //release tfod after getting label
+        if (tfod != null) {
+            tfod.shutdown();
+        }
 
         // SPLIT CODE FOR TARGET ZONES
 
