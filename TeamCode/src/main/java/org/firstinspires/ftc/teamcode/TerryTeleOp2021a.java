@@ -119,13 +119,6 @@ public class TerryTeleOp2021a extends LinearOpMode {
             slideSpower = gamepad1.left_stick_x;
             spinPowerCW = -gamepad1.left_trigger;
 
-            if (gamepad2.b) {
-                Terry.wobbleClamp.setPosition(0);
-            }
-            else {
-                Terry.wobbleClamp.setPosition(1);
-            }
-
 
             if (gamepad2.a == true) {
                 Terry.tubeSpin.setPosition(1);
@@ -174,31 +167,44 @@ public class TerryTeleOp2021a extends LinearOpMode {
             Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
 
             if (gamepad2.left_stick_y > 0.2) {
-                Terry.wobbleArmDrive.setPower(0.25);
+                Terry.wobbleArmDrive.setPower(0.5);
             } else if (gamepad2.left_stick_y < 0.2 && gamepad2.left_stick_y > -0.2) {
                 Terry.wobbleArmDrive.setPower(0);
             }
-
-            /*if (gamepad2.left_bumper =true) {
-                Terry.wobbleArmDrive.setPower(0.25);
-            } else if (gamepad2.left_bumper =false) {
-                Terry.wobbleArmDrive.setPower(0);
-            }  */
 
             if (gamepad2.left_stick_y < -0.2) {
-                Terry.wobbleArmDrive.setPower(-0.25);
+                Terry.wobbleArmDrive.setPower(-0.5);
             } else if (gamepad2.left_stick_y < 0.2 && gamepad2.left_stick_y > -0.2) {
                 Terry.wobbleArmDrive.setPower(0);
             }
 
-            /*if (gamepad2.right_bumper =true) {
-                Terry.wobbleArmDrive.setPower(-0.25);
-            } else if (gamepad2.right_bumper =false) {
-                Terry.wobbleArmDrive.setPower(0);
-            }  */
+
+
+            if (gamepad2.y == true) {
+                Terry.shooterDriveFront.setPower(2);
+                Terry.shooterDriveBack.setPower(2);
+            } else {
+                Terry.shooterDriveFront.setPower(0);
+                Terry.shooterDriveBack.setPower(0);
+            }
+
+
+            if (gamepad2.dpad_down == true) {
+                Terry.wobbleArmDrive.setTargetPosition(5);
+                Terry.wobbleClamp.setPosition(0);
+            } else {
+                Terry.wobbleArmDrive.setTargetPosition(0);
+                Terry.wobbleClamp.setPosition(1);
+            }
+
+
+
+
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());

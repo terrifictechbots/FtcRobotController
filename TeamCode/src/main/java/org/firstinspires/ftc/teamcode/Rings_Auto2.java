@@ -86,7 +86,7 @@ public class Rings_Auto2 extends LinearOpMode {
     static final double STOP = 0;
 
     // Temporary variable to hold the label of the detected object
-    String tempLabel = null;
+    String tempLabel = "no rings";
 
     private static final String VUFORIA_KEY =
             "ATmtSfv/////AAABmR8WElJ7jEXUlFRTowPWXCho/f+rytjnZJ9wA46OmtakoaZV1H9vnad9VQYLdEa1hpMdrslqRO2ZH6MuEvIb46HjosvUQcsMrMuQ8x3BdgmHIiJPEMjFkikP9gLt80K7hJRTT8EBZkXC7UsAB1JEC5v8p5gCwpYWkN6kua9ETIYTxrYmjnCpe+sKSv1LBCniFEvgah4ZASKiMaxEzwlJoQDlfIhVQ0YL4utkJ9A8+WbmHIybJO+ihRqc2eD6n1V86CLREtSZ1TXqicv0SMKnIHGxbCibFihtOl5orPO51HlNjZ2qxwE9EH9KOObpZq41fCiAd77VrqRCCmEr1McTrTfhk3TCTbBmc2SELnuysmZ5";
@@ -139,7 +139,7 @@ public class Rings_Auto2 extends LinearOpMode {
         // Start using camera to look for rings
 
         // Send telemetry message to signify Terry waiting;
-        telemetry.addData("Status", "Resetting encoder");    //
+        telemetry.addData("Status", "Resetting encoder");
         telemetry.update();
 
         Terry.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -165,11 +165,14 @@ public class Rings_Auto2 extends LinearOpMode {
         // Start with back against the wall with the camera forward
         // Holding wobble and 3 rings
         // Drive forward to align with rings
-        encoderDrive(DRIVE_SPEED/2, 36, 36, 36, 36);
+        encoderDrive(DRIVE_SPEED, 44, 44, 44, 44);
+
+        telemetry.addData("Status", "Starting to detect");
+        telemetry.update();
 
         // Object detection code
         if (opModeIsActive()) {
-            for (int repeatDetection = 0; repeatDetection < 10; repeatDetection ++) {
+            for (int repeatDetection = 0; repeatDetection < 60; repeatDetection ++) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -188,9 +191,7 @@ public class Rings_Auto2 extends LinearOpMode {
                             tempLabel = recognition.getLabel();
                         }
                         telemetry.update();
-                      /*if (updatedRecognitions() = "Quad");
-                        Terry.autonomousTargetZoneC
-                                else if {recognition.getLabel () = "Single"; */
+
                     }
                 }
             }
@@ -205,8 +206,14 @@ public class Rings_Auto2 extends LinearOpMode {
 
         // Target zone C if statement (4 rings)
         if (tempLabel == LABEL_FIRST_ELEMENT) {
+
             //drive to target zone C
-            telemetry.addData(String.format("label (%d)"), tempLabel);
+            // telemetry.addData(String.format("label"), tempLabel);
+
+            // telemetry.update();
+
+            //sleep(2000);
+
             // Go forward to target zone C
             encoderDrive(DRIVE_SPEED / 2, 80, 80, 80, 80);
 
@@ -261,9 +268,11 @@ public class Rings_Auto2 extends LinearOpMode {
 
         } else if (tempLabel == LABEL_SECOND_ELEMENT) {
             //drive to target zone B
-            telemetry.addData(String.format("label (%d)"), tempLabel);
+            // telemetry.addData(String.format("label"), tempLabel);
 
-            // Drive forward to line up with target zone B
+            // telemetry.update();
+
+            // Drive forward to line up with target zone B (1 ring)
             encoderDrive(DRIVE_SPEED/2,50,50,50,50);
 
             // Slide left to be in front of target zone B
@@ -317,80 +326,53 @@ public class Rings_Auto2 extends LinearOpMode {
 
         } else {
             //drive to target zone A
-            telemetry.addData(String.format("label (%d)"), tempLabel);
+            // telemetry.addData(String.format("label"), tempLabel);
+
+            // telemetry.update();
 
             // Drive forward to target zone A (0 rings)
-            encoderDrive(DRIVE_SPEED/2,36,36,36,36);
+            encoderDrive(DRIVE_SPEED,30,30,30,30);
 
             // Slide left to line up with first power shot
-            encoderDrive(SLIDEL_SPEED/2,-24,24,24,-24);
+            encoderDrive(SLIDEL_SPEED,-24,24,24,-24);
 
             // Shoot power shot
             // Slide left to line up with second power shot
-            encoderDrive(SLIDEL_SPEED/2,-8,8,8,-8);
+            encoderDrive(SLIDEL_SPEED / 2,-8,8,8,-8);
 
             // Shoot power shot
             // Slide left to line up with third power shot
-            encoderDrive(SLIDEL_SPEED/2,-8,8,8,-8);
+            encoderDrive(SLIDEL_SPEED / 2,-13,13,13,-13);
             // Shoot power shot
 
             // Back up to get next to the wobble
-            encoderDrive(DRIVE_SPEED / 2, -60, -60, -60, -60);
+            encoderDrive(DRIVE_SPEED, -54, -54, -54, -54);
 
-            // Spin left to face wobble with wobble arm
-            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
+            // Spin left to face wobble with front of robot
+            encoderDrive(TURN_SPEED, 20, -20, 20, -20);
 
-            // Back up to get close to wobble
-            encoderDrive(DRIVE_SPEED / 2, -20, -20, -20, -20);
+            // Go forward to get close to wobble
+            encoderDrive(DRIVE_SPEED, 36, 36, 36, 36);
 
-            // Pick up wobble
-            // Turn right to get ring pick up near rings
-            encoderDrive(TURN_SPEED / 2, 20, -20, 20, -20);
+            // Turn right keeping wobble in front of robot
+            encoderDrive(TURN_SPEED / 2, 0, 34, -34, 34);
 
-            // Go forward to get rings close to ring pick up
-            encoderDrive(DRIVE_SPEED / 2, 20, 20, 20, 20);
+            // Go forward to put wobble in zone
+            encoderDrive(DRIVE_SPEED, 47, 47, 47,47);
 
-            // Lower ring pick up arm
-            // Pick up rings
-            // Raise pick up arm
-            // Drive forward to line up with target zone A
-            encoderDrive(DRIVE_SPEED/2, 36,36,36,36);
+            // Back up away from wobble
+            encoderDrive(DRIVE_SPEED, -8,-8,-8,-8);
 
-            // Slide right to get in position to drop wobble in target zone A
-            encoderDrive(SLIDER_SPEED/2, 15,-15,-15,15);
+            // Slide left away from target zone
+            encoderDrive(SLIDEL_SPEED, -22,22,22,-22);
 
-            // Drop wobble
-            // Slide left to get away from target zone A
-            encoderDrive(SLIDEL_SPEED/2, -12,12,12,-12);
+            // Drive forward onto the line
+            encoderDrive(DRIVE_SPEED, 25,25,25,25);
 
-            // Drive forward to cross line
-            encoderDrive(DRIVE_SPEED/2, 5,5,5,5);
         }
 
         telemetry.update();
 
-        /* if () {
-            encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-            encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
-            Terry.wobbleClamp.setPosition(0.2);
-            encoderDrive(TURN_SPEED, -20, -20, 20, 20);
-            encoderDrive(DRIVE_SPEED, -2, -2, -2, -2);
-        } else if () {
-            encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
-            encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-            Terry.wobbleClamp.setPosition(0.2);
-            encoderDrive(TURN_SPEED, -20, -20, 20, 20);
-            encoderDrive(DRIVE_SPEED, -26, -26, -26, -26);
-            encoderDrive(SLIDEL_SPEED, 12, 12, 12, 12);
-        } else if () {
-            encoderDrive(DRIVE_SPEED, 48, 48, 48, 48);
-            encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-            encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
-            Terry.wobbleClamp.setPosition(0.2);
-            encoderDrive(SLIDEL_SPEED, 50, 50, 50, 50);
-            encoderDrive(TURN_SPEED, -20, -20, 20, 20);
-        }
-         */
         //Rings_Auto ends here
     }
 
@@ -453,6 +435,8 @@ public class Rings_Auto2 extends LinearOpMode {
                                 Terry.rightDrive.getCurrentPosition(),
                                 Terry.leftBackDrive.getCurrentPosition(),
                                 Terry.rightBackDrive.getCurrentPosition());
+
+                        telemetry.addData("target zone", tempLabel);
 
                         telemetry.update();
                     }
