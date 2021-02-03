@@ -31,7 +31,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //We're testing this comment
@@ -49,7 +51,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="TerryTeleOp2021", group="Linear Opmode")
+@TeleOp(name="TerryTeleOp2021a", group="Linear Opmode")
 //@Disabled
 public class TerryTeleOp2021a extends LinearOpMode {
 
@@ -117,11 +119,20 @@ public class TerryTeleOp2021a extends LinearOpMode {
             slideSpower = gamepad1.left_stick_x;
             spinPowerCW = -gamepad1.left_trigger;
 
-            if (gamepad2.b) {
-                Terry.wobbleClamp.setPosition(0);
+
+            if (gamepad2.a == true) {
+                Terry.tubeSpin.setPosition(1);
             }
             else {
-                Terry.wobbleClamp.setPosition(1);
+                Terry.tubeSpin.setPosition(0.5);
+            }
+
+
+            if (gamepad2.dpad_up) {
+                Terry.liftSpin.setPosition(0);
+            }
+            else {
+                Terry.liftSpin.setPosition(1);
             }
 
 
@@ -142,18 +153,6 @@ public class TerryTeleOp2021a extends LinearOpMode {
                 Terry.driveS(driveSPower);
             }
 
-            if (gamepad2.left_trigger > 0.2 || gamepad2.left_trigger < - 0.2) {
-                Terry.wobbleArmDrive.setPower(0.25);
-            } else if (gamepad2.left_trigger < 0.2 && gamepad2.left_trigger > -0.2) {
-                Terry.wobbleArmDrive.setPower(0);
-            }
-
-            if (gamepad2.right_trigger > 0.2 || gamepad2.right_trigger < -0.2) {
-                Terry.wobbleArmDrive.setPower(-0.5);
-            } else if (gamepad2.right_trigger < 0.2 && gamepad2.right_trigger > -0.2) {
-                Terry.wobbleArmDrive.setPower(0);
-            }
-
             else {
                 Terry.drive(0);
                 Terry.slideL(0);
@@ -163,11 +162,49 @@ public class TerryTeleOp2021a extends LinearOpMode {
                 Terry.slideS(0);
             }
 
-
             Terry.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
+            if (gamepad2.left_stick_y > 0.2) {
+                Terry.wobbleArmDrive.setPower(0.5);
+            } else if (gamepad2.left_stick_y < 0.2 && gamepad2.left_stick_y > -0.2) {
+                Terry.wobbleArmDrive.setPower(0);
+            }
+
+            if (gamepad2.left_stick_y < -0.2) {
+                Terry.wobbleArmDrive.setPower(-0.5);
+            } else if (gamepad2.left_stick_y < 0.2 && gamepad2.left_stick_y > -0.2) {
+                Terry.wobbleArmDrive.setPower(0);
+            }
+
+
+
+            if (gamepad2.y == true) {
+                Terry.shooterDriveFront.setPower(2);
+                Terry.shooterDriveBack.setPower(2);
+            } else {
+                Terry.shooterDriveFront.setPower(0);
+                Terry.shooterDriveBack.setPower(0);
+            }
+
+
+            if (gamepad2.dpad_down == true) {
+                Terry.wobbleArmDrive.setTargetPosition(5);
+                Terry.wobbleClamp.setPosition(0);
+            } else {
+                Terry.wobbleArmDrive.setTargetPosition(0);
+                Terry.wobbleClamp.setPosition(1);
+            }
+
+
+
+
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());

@@ -34,24 +34,24 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+import java.util.List;
+
 //import org.firstinspires.ftc.Terrycontroller.external.samples.HardwarePushbot;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the Terry.
  * The code is structured as a LinearOpMode
  *
  * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: PushbotAutoDriveByTime;
  *
  *  This code ALSO requires that the drive Motors have been configured such that a positive
  *  power command moves them forwards, and causes the encoders to count UP.
- *
- *   The desired path in this example is:
- *   - Drive forward for 48 inches
- *   - Spin right for 12 Inches
- *   - Drive Backwards for 24 inches
- *   - Stop and close the claw.
  *
  *  The code is written using a method called: encoderDrive(speed, leftInches, rightInches, timeoutS)
  *  that performs the actual movement.
@@ -70,6 +70,9 @@ public class Rings_Auto2 extends LinearOpMode {
     /* Declare OpMode members. */
     TechbotHardware        Terry   = new TechbotHardware();   // Use a Pushbot's hardware
     private ElapsedTime runtime = new ElapsedTime();
+    private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
+    private static final String LABEL_FIRST_ELEMENT = "Quad";
+    private static final String LABEL_SECOND_ELEMENT = "Single";
 
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // eg: TETRIX Motor Encoder - 1440
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -82,16 +85,61 @@ public class Rings_Auto2 extends LinearOpMode {
     static final double SLIDER_SPEED = 0.6;
     static final double STOP = 0;
 
+    // Temporary variable to hold the label of the detected object
+    String tempLabel = "no rings";
+
+    private static final String VUFORIA_KEY =
+            "ATmtSfv/////AAABmR8WElJ7jEXUlFRTowPWXCho/f+rytjnZJ9wA46OmtakoaZV1H9vnad9VQYLdEa1hpMdrslqRO2ZH6MuEvIb46HjosvUQcsMrMuQ8x3BdgmHIiJPEMjFkikP9gLt80K7hJRTT8EBZkXC7UsAB1JEC5v8p5gCwpYWkN6kua9ETIYTxrYmjnCpe+sKSv1LBCniFEvgah4ZASKiMaxEzwlJoQDlfIhVQ0YL4utkJ9A8+WbmHIybJO+ihRqc2eD6n1V86CLREtSZ1TXqicv0SMKnIHGxbCibFihtOl5orPO51HlNjZ2qxwE9EH9KOObpZq41fCiAd77VrqRCCmEr1McTrTfhk3TCTbBmc2SELnuysmZ5";
+
+    /**
+     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
+     * localization engine.
+     */
+    private VuforiaLocalizer vuforia;
+
+    /**
+     * {@link #tfod} is the variable we will use to store our instance of the TensorFlow Object
+     * Detection engine.
+     */
+    private TFObjectDetector tfod;
+
     @Override
     public void runOpMode() {
+        initVuforia();
+        initTfod();
+
+        if (tfod != null) {
+            tfod.activate();
+
+            // The TensorFlow software will scale the input images from the camera to a lower resolution.
+            // This can result in lower detection accuracy at longer distances (> 55cm or 22").
+            // If your target is at distance greater than 50 cm (20") you can adjust the magnification value
+            // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
+            // should be set to the value of the images used to create the TensorFlow Object Detection model
+            // (typically 1.78 or 16/9).
+
+
+            // This is the zoom line
+            tfod.setZoom(3, 1.78);
+        }
+
+        /** Wait for the game to begin */
+        telemetry.addData(">", "Press Play to start op mode");
+        telemetry.update();
+        /**
+         * Activate TensorFlow Object Detection before we wait for the start command.
+         * Do it here so that the Camera Stream window will have the TensorFlow annotations visible.
+         **/
 
         /*
          * Initialize the drive system variables.
          * The init() method of the hardware class does all the work here
          */
         Terry.init(hardwareMap);
+        // Start using camera to look for rings
 
-        telemetry.addData("Status", "Resetting         // Send telemetry message to signify Terry waiting;\nEncoders");    //
+        // Send telemetry message to signify Terry waiting;
+        telemetry.addData("Status", "Resetting encoder");
         telemetry.update();
 
         Terry.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -103,98 +151,229 @@ public class Rings_Auto2 extends LinearOpMode {
         Terry.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         // Turn On RUN_TO_POSITION
         Terry.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Terry.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
-        // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Path0", "Starting at %7d :%7d :%7d :%7d",
-                Terry.leftDrive.getCurrentPosition(),
-                Terry.rightDrive.getCurrentPosition(),
-                Terry.leftBackDrive.getCurrentPosition(),
-                Terry.rightBackDrive.getCurrentPosition());
-
-        telemetry.update();
-
-        // Wait for the game to start (driver presses PLAY)
         waitForStart();
-
-
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-
-        //For this code start with the outside of the left wheel on the crack between the second and third block.
-        // Also make sure that the hand is facing forward ready to pick up the block.
-
-        //Terry.servoHand.setPosition(1);
 
         //Rings_Auto starts here
 
-        encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
+        // Start with back against the wall with the camera forward
+        // Holding wobble and 3 rings
+        // Drive forward to align with rings
+        encoderDrive(DRIVE_SPEED, 44, 44, 44, 44);
 
-        encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-        //I have no idea how to turn so the chances of this being correct are slim
+        telemetry.addData("Status", "Starting to detect");
+        telemetry.update();
 
-        encoderDrive(DRIVE_SPEED, 18, 18, 18, 18);
+        // Object detection code
+        if (opModeIsActive()) {
+            for (int repeatDetection = 0; repeatDetection < 60; repeatDetection ++) {
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        // step through the list of recognitions and display boundary info.
+                        int i = 0;
+                        for (Recognition recognition : updatedRecognitions) {
+                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+                                    recognition.getLeft(), recognition.getTop());
+                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                                    recognition.getRight(), recognition.getBottom());
+                            telemetry.addData(String.format("top (%d)", i), recognition.getTop());
+                            tempLabel = recognition.getLabel();
+                        }
+                        telemetry.update();
 
-        //move the arm before we clamp
-        //Terry.wobbleArmDrive.
-        Terry.wobbleClamp.setPosition(0.2);
-        // Hand is closed on wobble
-
-        encoderDrive(TURN_SPEED, -20, -20, 20, 20);
-        //turn 90 degrees (measurements are incorrect)
-
-        encoderDrive(DRIVE_SPEED, 25, 25, 25, 25);
-
-        //Terry.servoHand.setPosition(0.2);
-        //We don't know what thing to use shoot rings
-
-        encoderDrive(SLIDER_SPEED, 12, 12, 12, 12);
-
-        encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-
-        encoderDrive(DRIVE_SPEED, 48, 48, 48, 48);
-
-        //Sense how many rings there are, we don't know how to do it yet
-        //Line up to pick up rings
-
-        Terry.tubeSpin.setPosition(0.2);
-        //Pick up rings
-
-        encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-
-        encoderDrive(DRIVE_SPEED, 48, 48, 48, 48);
-        //back at launch line
-
-
-        /* if () {
-            encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-            encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
-            Terry.wobbleClamp.setPosition(0.2);
-            encoderDrive(TURN_SPEED, -20, -20, 20, 20);
-            encoderDrive(DRIVE_SPEED, -2, -2, -2, -2);
-        } else if () {
-            encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
-            encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-            Terry.wobbleClamp.setPosition(0.2);
-            encoderDrive(TURN_SPEED, -20, -20, 20, 20);
-            encoderDrive(DRIVE_SPEED, -26, -26, -26, -26);
-            encoderDrive(SLIDEL_SPEED, 12, 12, 12, 12);
-        } else if () {
-            encoderDrive(DRIVE_SPEED, 48, 48, 48, 48);
-            encoderDrive(TURN_SPEED, 20, 20, -20, -20);
-            encoderDrive(DRIVE_SPEED, 24, 24, 24, 24);
-            Terry.wobbleClamp.setPosition(0.2);
-            encoderDrive(SLIDEL_SPEED, 50, 50, 50, 50);
-            encoderDrive(TURN_SPEED, -20, -20, 20, 20);
+                    }
+                }
+            }
         }
-         */
-        //Rings_Auto ends here
 
+        //release tfod after getting label
+        if (tfod != null) {
+            tfod.shutdown();
+        }
+
+        // SPLIT CODE FOR TARGET ZONES
+
+        // Target zone C if statement (4 rings)
+        if (tempLabel == LABEL_FIRST_ELEMENT) {
+
+            //drive to target zone C
+            // telemetry.addData(String.format("label"), tempLabel);
+
+            // telemetry.update();
+
+            //sleep(2000);
+
+            // Go forward to target zone C
+            encoderDrive(DRIVE_SPEED / 2, 80, 80, 80, 80);
+
+            // Drop wobble
+            encoderDrive(DRIVE_SPEED / 2, -40, -40, -40, -40);
+
+            // Slide left to line up with first power shot
+            encoderDrive(SLIDEL_SPEED / 2, -26, 26, 26, -26);
+
+            // Slide to the front of the target
+            encoderDrive(SLIDEL_SPEED / 2, -8, 8, 8, -8);
+
+            // Shoot one ring to first target
+            // Slide to line up with the other power shot
+            encoderDrive(SLIDEL_SPEED / 2, -8, 8, 8, -8);
+
+            // Shoot second power shot
+            // Slide to third power shot
+            encoderDrive(SLIDEL_SPEED / 2, -8, 8, 8, -8);
+
+            // Shoot third power shot
+
+            // Back up to get next to the wobble
+            encoderDrive(DRIVE_SPEED / 2, -60, -60, -60, -60);
+
+            // Spin left to face wobble with wobble arm
+            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
+
+            // Back up to get close to wobble
+            encoderDrive(DRIVE_SPEED / 2, -20, -20, -20, -20);
+
+            // Pick up wobble
+            // Turn right to get ring pick up near rings
+            encoderDrive(TURN_SPEED / 2, 20, -20, 20, -20);
+
+            // Go forward to get rings close to ring pick up
+            encoderDrive(DRIVE_SPEED / 2, 20, 20, 20, 20);
+
+            // Lower ring pick up arm
+            // Pick up rings
+            // Raise pick up arm
+            // Go forward to line up with target zone C
+            encoderDrive(DRIVE_SPEED / 2, 80, 80, 80, 80);
+
+            // Turn left to face target zone C
+            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
+
+            // Drop wobble
+            // Slide left to launch line
+            encoderDrive(SLIDEL_SPEED / 2, -40, 40, 40, -40);
+
+
+        } else if (tempLabel == LABEL_SECOND_ELEMENT) {
+            //drive to target zone B
+            // telemetry.addData(String.format("label"), tempLabel);
+
+            // telemetry.update();
+
+            // Drive forward to line up with target zone B (1 ring)
+            encoderDrive(DRIVE_SPEED/2,50,50,50,50);
+
+            // Slide left to be in front of target zone B
+            encoderDrive(SLIDEL_SPEED/2, 10,10,10,10);
+
+            // Drop wobble
+            // Back up to launch line
+            encoderDrive(DRIVE_SPEED/2, -20,-20,-20,-20);
+
+            // Slide left to line up with first power shot
+            encoderDrive(SLIDEL_SPEED/2, -10,10,10,-10);
+
+            // Shoot first power shot
+            // Slide left to line up with second power shot
+            encoderDrive(SLIDEL_SPEED/2,-8,8,8,-8);
+
+            // Shoot second power shot
+            // Slide left to line up with third power shot
+            encoderDrive(SLIDEL_SPEED/2,-8,8,8,-8);
+
+            // Shoot third power shot
+            // Back up to get next to the wobble
+            encoderDrive(DRIVE_SPEED / 2, -60, -60, -60, -60);
+
+            // Spin left to face wobble with wobble arm
+            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
+
+            // Back up to get close to wobble
+            encoderDrive(DRIVE_SPEED / 2, -20, -20, -20, -20);
+
+            // Pick up wobble
+            // Turn right to get ring pick up near rings
+            encoderDrive(TURN_SPEED / 2, 20, -20, 20, -20);
+
+            // Go forward to get rings close to ring pick up
+            encoderDrive(DRIVE_SPEED / 2, 20, 20, 20, 20);
+
+            // Lower ring pick up arm
+            // Pick up rings
+            // Raise pick up arm
+            // Go forward to target zone B
+            encoderDrive(DRIVE_SPEED/2,40,40,40,40);
+
+            // Turn left to face target zone with wobble arm
+            encoderDrive(TURN_SPEED/2, -20,20,-20,20);
+
+            // Drop wobble
+            // Go forward to launch line
+            encoderDrive(DRIVE_SPEED/2,24,24,24,24);
+
+
+        } else {
+            //drive to target zone A
+            // telemetry.addData(String.format("label"), tempLabel);
+
+            // telemetry.update();
+
+            // Drive forward to target zone A (0 rings)
+            encoderDrive(DRIVE_SPEED,30,30,30,30);
+
+            // Slide left to line up with first power shot
+            encoderDrive(SLIDEL_SPEED,-24,24,24,-24);
+
+            // Shoot power shot
+            // Slide left to line up with second power shot
+            encoderDrive(SLIDEL_SPEED / 2,-8,8,8,-8);
+
+            // Shoot power shot
+            // Slide left to line up with third power shot
+            encoderDrive(SLIDEL_SPEED / 2,-13,13,13,-13);
+            // Shoot power shot
+
+            // Back up to get next to the wobble
+            encoderDrive(DRIVE_SPEED, -54, -54, -54, -54);
+
+            // Spin left to face wobble with front of robot
+            encoderDrive(TURN_SPEED, 20, -20, 20, -20);
+
+            // Go forward to get close to wobble
+            encoderDrive(DRIVE_SPEED, 36, 36, 36, 36);
+
+            // Turn right keeping wobble in front of robot
+            encoderDrive(TURN_SPEED / 2, 0, 34, -34, 34);
+
+            // Go forward to put wobble in zone
+            encoderDrive(DRIVE_SPEED, 47, 47, 47,47);
+
+            // Back up away from wobble
+            encoderDrive(DRIVE_SPEED, -8,-8,-8,-8);
+
+            // Slide left away from target zone
+            encoderDrive(SLIDEL_SPEED, -22,22,22,-22);
+
+            // Drive forward onto the line
+            encoderDrive(DRIVE_SPEED, 25,25,25,25);
+
+        }
+
+        telemetry.update();
+
+        //Rings_Auto ends here
     }
 
     /*
@@ -205,35 +384,7 @@ public class Rings_Auto2 extends LinearOpMode {
      *  2) Move runs out of time
      *  3) Driver stops the opmode running.
      */
-    public void encoderDrive(double speed,
-        double leftInches, double rightInches, double leftBackInches, double rightBackInches) {
-            int newLeftTarget;
-            int newRightTarget;
-            int newLeftBackTarget;
-            int newRightBackTarget;
 
-        // Ensure that the opmode is still active
-        if (opModeIsActive()) {
-
-            // Determine new target position, and pass to motor controller
-            newLeftTarget = Terry.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = Terry.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            newLeftBackTarget = Terry.leftBackDrive.getCurrentPosition() + (int)(leftBackInches * COUNTS_PER_INCH);
-            newRightBackTarget = Terry.rightBackDrive.getCurrentPosition() + (int)(rightBackInches * COUNTS_PER_INCH);
-
-
-            Terry.leftDrive.setTargetPosition(newLeftTarget);
-            Terry.rightDrive.setTargetPosition(newRightTarget);
-            Terry.leftBackDrive.setTargetPosition(newLeftBackTarget);
-           Terry.rightBackDrive.setTargetPosition(newRightBackTarget);
-
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            Terry.leftDrive.setPower(Math.abs(speed));
-            Terry.rightDrive.setPower(Math.abs(speed));
-            Terry.leftBackDrive.setPower(Math.abs(speed));
-            Terry.rightBackDrive.setPower(Math.abs(speed));
 
 
 
@@ -244,47 +395,101 @@ public class Rings_Auto2 extends LinearOpMode {
             // However, if you require that BOTH motors have finished their moves before the Terry continues
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             //while (Terry.rightDrive.getCurrentPosition() < newRightTarget && opModeIsActive()) {
-            while (opModeIsActive() && (Terry.rightDrive.isBusy() || Terry.leftBackDrive.isBusy() || Terry.leftDrive.isBusy() || Terry.leftBackDrive.isBusy()));
 
-                // Display it for the driver.
-                telemetry.addData("TargetPos",  "Running to %7d :%7d :%7d :%7d", newLeftTarget,  newRightTarget, newLeftBackTarget, newRightBackTarget);
-                telemetry.addData("CurrentPos",  "Running at %7d :%7d :%7d :%7d",
-                                            Terry.leftDrive.getCurrentPosition(),
-                                            Terry.rightDrive.getCurrentPosition(),
-                                            Terry.rightDrive.getCurrentPosition(),
-                                            Terry.rightDrive.getCurrentPosition());
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches, double leftBackInches, double rightBackInches) {
+                int newLeftTarget;
+                int newRightTarget;
+                int newLeftBackTarget;
+                int newRightBackTarget;
 
-                telemetry.update();
-            }
-            Terry.leftDrive.setPower(0);
-            Terry.rightDrive.setPower(0);
-            Terry.leftBackDrive.setPower(0);
-            Terry.rightBackDrive.setPower(0);
+                // Ensure that the opmode is still active
+                if (opModeIsActive()) {
 
-        Terry.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Terry.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Terry.leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Terry.rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        Terry.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Terry.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        // Turn On RUN_TO_POSITION
-        Terry.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Terry.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    // Determine new target position, and pass to motor controller
+                    newLeftTarget = Terry.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+                    newRightTarget = Terry.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+                    newLeftBackTarget = Terry.leftBackDrive.getCurrentPosition() + (int)(leftBackInches * COUNTS_PER_INCH);
+                    newRightBackTarget = Terry.rightBackDrive.getCurrentPosition() + (int)(rightBackInches * COUNTS_PER_INCH);
 
 
-            // Turn off RUN_TO_POSITION
-           /* Terry.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Terry.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-*/
+                    Terry.leftDrive.setTargetPosition(newLeftTarget);
+                    Terry.rightDrive.setTargetPosition(newRightTarget);
+                    Terry.leftBackDrive.setTargetPosition(newLeftBackTarget);
+                    Terry.rightBackDrive.setTargetPosition(newRightBackTarget);
 
-//             sleep(250);   // optional pause after each move
+                    // reset the timeout time and start motion.
+                    runtime.reset();
+                    Terry.leftDrive.setPower(Math.abs(speed));
+                    Terry.rightDrive.setPower(Math.abs(speed));
+                    Terry.leftBackDrive.setPower(Math.abs(speed));
+                    Terry.rightBackDrive.setPower(Math.abs(speed));
+
+                    while (opModeIsActive() && (Terry.rightDrive.isBusy() || Terry.leftBackDrive.isBusy() || Terry.leftDrive.isBusy() || Terry.leftBackDrive.isBusy()))
+                    {
+
+                        // Display it for the driver.
+                        telemetry.addData("TargetPos", "Running to %7d :%7d :%7d :%7d", newLeftTarget, newRightTarget, newLeftBackTarget, newRightBackTarget);
+                        telemetry.addData("CurrentPos", "Running at %7d :%7d :%7d :%7d",
+                                Terry.leftDrive.getCurrentPosition(),
+                                Terry.rightDrive.getCurrentPosition(),
+                                Terry.leftBackDrive.getCurrentPosition(),
+                                Terry.rightBackDrive.getCurrentPosition());
+
+                        telemetry.addData("target zone", tempLabel);
+
+                        telemetry.update();
+                    }
+
+                    Terry.leftDrive.setPower(0);
+                    Terry.rightDrive.setPower(0);
+                    Terry.leftBackDrive.setPower(0);
+                    Terry.rightBackDrive.setPower(0);
+
+                    Terry.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    Terry.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    Terry.leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    Terry.rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    Terry.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    Terry.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    // Turn On RUN_TO_POSITION
+                    Terry.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Terry.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         }
     }
+    // Defining function for vuforia
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "camera");
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the TensorFlow Object Detection engine.
+    }
+
+
+    /**
+     * Initialize the TensorFlow Object Detection engine.
+     */
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfodParameters.minResultConfidence = 0.8f;
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
+    }
+}
 
