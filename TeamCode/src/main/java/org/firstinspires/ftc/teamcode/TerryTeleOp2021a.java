@@ -221,53 +221,48 @@ public class TerryTeleOp2021a extends LinearOpMode {
                 Terry.wobbleClamp.setPosition(1);
             }
 
-            public void encoderDrive(double speed, double armInches) {
-                int newArmTarget;
-
-                // Ensure that the opmode is still active
-                if (opModeIsActive()) {
-
-                    // Determine new target position, and pass to motor controller
-                    newArmTarget = Terry.wobbleArmDrive.getCurrentPosition() + (int)(armInches * COUNTS_PER_INCH);
-
-                    Terry.wobbleArmDrive.setTargetPosition(newArmTarget);
-
-                    // reset the timeout time and start motion.
-                    runtime.reset();
-                    Terry.wobbleArmDrive.setPower(Math.abs(speed));
-
-                    while (opModeIsActive() && (Terry.wobbleArmDrive.isBusy()))
-                    {
-
-                        // Display it for the driver.
-                        telemetry.addData("TargetPos", "Running to %7d , newArmTarget");
-                        telemetry.addData("CurrentPos", "Running at %7d ",
-                                Terry.wobbleArmDrive.getCurrentPosition());
-
-                        telemetry.update();
-                    }
-
-                    Terry.wobbleArmDrive.setPower(0);
-
-                    Terry.wobbleArmDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                    Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                    // Turn On RUN_TO_POSITION
-                    Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                }
-            }
-
-
-
-
-
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
             // telemetry.addData("Motors", "left (%.2f), right (%.2f)", Terry.leftDrive, Terry.rightDrive, /*armPower, */Terry.leftBackDrive, Terry.rightBackDrive);
             /*telemetry.addData("Servo Position", "%5.2f", handPosition/*, wristPosition);*/
             //telemetry.update();
+        }
+    }
+    public void encoderDrive(double speed, double armInches) {
+        int newArmTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newArmTarget = Terry.wobbleArmDrive.getCurrentPosition() + (int)(armInches * COUNTS_PER_INCH);
+
+            Terry.wobbleArmDrive.setTargetPosition(newArmTarget);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            Terry.wobbleArmDrive.setPower(Math.abs(speed));
+
+            while (opModeIsActive() && (Terry.wobbleArmDrive.isBusy()))
+            {
+
+                // Display it for the driver.
+                telemetry.addData("TargetPos", "Running to %7d , newArmTarget");
+                telemetry.addData("CurrentPos", "Running at %7d ",
+                        Terry.wobbleArmDrive.getCurrentPosition());
+
+                telemetry.update();
+            }
+
+            Terry.wobbleArmDrive.setPower(0);
+
+            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            // Turn On RUN_TO_POSITION
+            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
     }
 }
