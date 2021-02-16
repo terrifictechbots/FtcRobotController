@@ -275,7 +275,7 @@ public class TechbotHardware {
 
         wobbleClamp.setPosition(MID_SERVO);
         tubeSpin.setPosition(MID_SERVO);
-        liftSpin.setPosition(0);
+        liftSpin.setPosition(1);
     }
  }
 

@@ -186,7 +186,7 @@ public class TerryTeleOp2021a extends LinearOpMode {
 
 
             if (gamepad2.y == true) {
-                Terry.shooterDriveFront.setPower(2);
+                Terry.shooterDriveFront.setPower(-2);
                 Terry.shooterDriveBack.setPower(2);
             } else {
                 Terry.shooterDriveFront.setPower(0);

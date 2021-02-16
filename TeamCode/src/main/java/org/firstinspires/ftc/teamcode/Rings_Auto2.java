@@ -171,8 +171,8 @@ public class Rings_Auto2 extends LinearOpMode {
         telemetry.update();
 
         // Object detection code
-        if (opModeIsActive()) {
-            for (int repeatDetection = 0; repeatDetection < 60; repeatDetection ++) {
+        /*if (opModeIsActive()) {
+            for (int repeatDetection = 0; repeatDetection < 200; repeatDetection ++) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -207,124 +207,101 @@ public class Rings_Auto2 extends LinearOpMode {
         // Target zone C if statement (4 rings)
         if (tempLabel == LABEL_FIRST_ELEMENT) {
 
-            //drive to target zone C
-            // telemetry.addData(String.format("label"), tempLabel);
-
-            // telemetry.update();
-
-            //sleep(2000);
-
             // Go forward to target zone C
-            encoderDrive(DRIVE_SPEED / 2, 80, 80, 80, 80);
+            encoderDrive(DRIVE_SPEED, 100, 100, 100, 100);
 
-            // Drop wobble
-            encoderDrive(DRIVE_SPEED / 2, -40, -40, -40, -40);
+            // Drop wobble and back up to launch line
+            encoderDrive(DRIVE_SPEED, -50, -50, -50, -50);
 
             // Slide left to line up with first power shot
-            encoderDrive(SLIDEL_SPEED / 2, -26, 26, 26, -26);
-
-            // Slide to the front of the target
-            encoderDrive(SLIDEL_SPEED / 2, -8, 8, 8, -8);
+            encoderDrive(SLIDEL_SPEED, -34, 34, 34, -34);
 
             // Shoot one ring to first target
             // Slide to line up with the other power shot
-            encoderDrive(SLIDEL_SPEED / 2, -8, 8, 8, -8);
+            encoderDrive(SLIDEL_SPEED, -8, 8, 8, -8);
 
             // Shoot second power shot
-            // Slide to third power shot
-            encoderDrive(SLIDEL_SPEED / 2, -8, 8, 8, -8);
-
-            // Shoot third power shot
+            // Slide left to line up with third power shot
+            encoderDrive(SLIDEL_SPEED,-13,13,13,-13);
+            // Shoot power shot
 
             // Back up to get next to the wobble
-            encoderDrive(DRIVE_SPEED / 2, -60, -60, -60, -60);
+            encoderDrive(DRIVE_SPEED, -74, -74, -74, -74);
 
-            // Spin left to face wobble with wobble arm
-            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
+            // Spin left to face wobble with front of robot
+            encoderDrive(TURN_SPEED, 20, -20, 20, -20);
 
-            // Back up to get close to wobble
-            encoderDrive(DRIVE_SPEED / 2, -20, -20, -20, -20);
+            // Go forward to get close to wobble
+            encoderDrive(DRIVE_SPEED, 43, 43, 43, 43);
 
-            // Pick up wobble
-            // Turn right to get ring pick up near rings
-            encoderDrive(TURN_SPEED / 2, 20, -20, 20, -20);
+            // Turn right keeping wobble in front of robot
+            encoderDrive(TURN_SPEED/2, 0, 34, -34, 34);
 
-            // Go forward to get rings close to ring pick up
-            encoderDrive(DRIVE_SPEED / 2, 20, 20, 20, 20);
+            // Go forward to put wobble in zone
+            encoderDrive(DRIVE_SPEED, 122,122,122,122);
 
-            // Lower ring pick up arm
-            // Pick up rings
-            // Raise pick up arm
-            // Go forward to line up with target zone C
-            encoderDrive(DRIVE_SPEED / 2, 80, 80, 80, 80);
-
-            // Turn left to face target zone C
-            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
-
-            // Drop wobble
-            // Slide left to launch line
-            encoderDrive(SLIDEL_SPEED / 2, -40, 40, 40, -40);
-
-
-        } else if (tempLabel == LABEL_SECOND_ELEMENT) {
-            //drive to target zone B
-            // telemetry.addData(String.format("label"), tempLabel);
-
-            // telemetry.update();
-
-            // Drive forward to line up with target zone B (1 ring)
-            encoderDrive(DRIVE_SPEED/2,50,50,50,50);
-
-            // Slide left to be in front of target zone B
-            encoderDrive(SLIDEL_SPEED/2, 10,10,10,10);
-
-            // Drop wobble
             // Back up to launch line
-            encoderDrive(DRIVE_SPEED/2, -20,-20,-20,-20);
+            encoderDrive(DRIVE_SPEED, -33, -33, -33, -33);
 
-            // Slide left to line up with first power shot
-            encoderDrive(SLIDEL_SPEED/2, -10,10,10,-10);
 
-            // Shoot first power shot
+        } else if (tempLabel == LABEL_SECOND_ELEMENT) { */
+
+            // Drift forward to line up with target zone B (1 ring) and turn
+            encoderDrive(DRIVE_SPEED/2,55,93,93,93);
+
+            // Drive forward to get wobble in target zone
+            encoderDrive(DRIVE_SPEED/2,4,4,4,4);
+
+            // Back away from wobble
+            encoderDrive(DRIVE_SPEED/2, -10,-10,-10,-10);
+
+            // Turn 90 degrees to face power shots
+            encoderDrive(TURN_SPEED/2, 15,-15,15,-15);
+
+            // Back up to get behind launch line
+            encoderDrive(DRIVE_SPEED/2,-28,-28,-28,-28);
+
+            // Slide to first power shot
+            encoderDrive(SLIDEL_SPEED/2,-27,27,27,-27);
+
+            // Shoot power shot
             // Slide left to line up with second power shot
             encoderDrive(SLIDEL_SPEED/2,-8,8,8,-8);
 
             // Shoot second power shot
             // Slide left to line up with third power shot
-            encoderDrive(SLIDEL_SPEED/2,-8,8,8,-8);
+            encoderDrive(SLIDEL_SPEED/2,-13,13,13,-13);
 
             // Shoot third power shot
             // Back up to get next to the wobble
-            encoderDrive(DRIVE_SPEED / 2, -60, -60, -60, -60);
+            encoderDrive(DRIVE_SPEED/2, -66, -66, -66, -66);
 
-            // Spin left to face wobble with wobble arm
-            encoderDrive(TURN_SPEED / 2, -20, 20, -20, 20);
+            // Spin left to face wobble with front of robot
+            encoderDrive(TURN_SPEED/2, 20, -20, 20, -20);
 
-            // Back up to get close to wobble
-            encoderDrive(DRIVE_SPEED / 2, -20, -20, -20, -20);
+            // Go forward to get close to wobble
+            encoderDrive(DRIVE_SPEED/2, 43, 43, 43, 43);
 
-            // Pick up wobble
-            // Turn right to get ring pick up near rings
-            encoderDrive(TURN_SPEED / 2, 20, -20, 20, -20);
+            // Turn keeping wobble in front of robot
+            encoderDrive(TURN_SPEED/2, 0,28,-28,28);
 
-            // Go forward to get rings close to ring pick up
-            encoderDrive(DRIVE_SPEED / 2, 20, 20, 20, 20);
+            // Drift forward to line up with target zone B (1 ring) and turn
+            encoderDrive(DRIVE_SPEED/2,50,84,84,84);
 
-            // Lower ring pick up arm
-            // Pick up rings
-            // Raise pick up arm
-            // Go forward to target zone B
-            encoderDrive(DRIVE_SPEED/2,40,40,40,40);
+            // Drive forward to get wobble in target zone
+            encoderDrive(DRIVE_SPEED/2,10,10,10,10);
 
-            // Turn left to face target zone with wobble arm
-            encoderDrive(TURN_SPEED/2, -20,20,-20,20);
+            // Back away from wobble
+            encoderDrive(DRIVE_SPEED/2, 10,10,10,10);
 
-            // Drop wobble
-            // Go forward to launch line
-            encoderDrive(DRIVE_SPEED/2,24,24,24,24);
+            // Turn 90 degrees to face power shots
+            encoderDrive(TURN_SPEED/2, 20,-20,20,-20);
+
+            // Back up to get behind launch line
+            encoderDrive(DRIVE_SPEED/2,-12,-12,-12,-12);
 
 
-        } else {
+       /* } else {
             //drive to target zone A
             // telemetry.addData(String.format("label"), tempLabel);
 
@@ -371,7 +348,7 @@ public class Rings_Auto2 extends LinearOpMode {
 
         }
 
-        telemetry.update();
+        telemetry.update(); */
 
         //Rings_Auto ends here
     }
