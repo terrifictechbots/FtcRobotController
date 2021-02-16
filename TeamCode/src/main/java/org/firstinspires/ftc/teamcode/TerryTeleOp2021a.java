@@ -56,16 +56,22 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class TerryTeleOp2021a extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
     private TechbotHardware Terry = new TechbotHardware();
+    private ElapsedTime runtime = new ElapsedTime();
 
+    static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // eg: TETRIX Motor Encoder - 1440
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     DRIVE_GEAR_REDUCTION    = 1 ;     // This is < 1.0 if geared UP
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double wobbleDrive = 0.6;
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        System.out.println("Is this thing working?!");
+        //System.out.println("Is this thing working?!");
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -74,6 +80,17 @@ public class TerryTeleOp2021a extends LinearOpMode {
         Terry.init(hardwareMap);
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
+
+        // Send telemetry message to signify Terry waiting;
+        telemetry.addData("Status", "Resetting encoder");
+        telemetry.update();
+
+        Terry.wobbleArmDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Turn On RUN_TO_POSITION
+        Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -89,10 +106,11 @@ public class TerryTeleOp2021a extends LinearOpMode {
             double slideSpower;
             double spinPowerCW;
             double driveSPower;
+            double wobblePower;
 
 
             // Touch Sensors
-            String touchSensorValue;
+            /*String touchSensorValue;
             if(Terry.touchSensor1.isPressed()) {
                 touchSensorValue = "Pressed";
             } else {
@@ -107,7 +125,7 @@ public class TerryTeleOp2021a extends LinearOpMode {
                 touchSensorValue = "Not Pressed";
             }
             telemetry.addData("touchSensor2", touchSensorValue);
-            telemetry.update();
+            telemetry.update();*/
 
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
@@ -134,7 +152,6 @@ public class TerryTeleOp2021a extends LinearOpMode {
             else {
                 Terry.liftSpin.setPosition(1);
             }
-
 
 
             // Send calculated power to wheels
@@ -195,12 +212,52 @@ public class TerryTeleOp2021a extends LinearOpMode {
 
 
             if (gamepad2.dpad_down == true) {
-                Terry.wobbleArmDrive.setTargetPosition(5);
+                encoderDrive(wobbleDrive / 2, 5);
+                //Terry.wobbleArmDrive.setTargetPosition(5);
                 Terry.wobbleClamp.setPosition(0);
             } else {
-                Terry.wobbleArmDrive.setTargetPosition(0);
+                encoderDrive(wobbleDrive / 2, -5);
+                //Terry.wobbleArmDrive.setTargetPosition(0);
                 Terry.wobbleClamp.setPosition(1);
             }
+
+            public void encoderDrive(double speed, double armInches) {
+                int newArmTarget;
+
+                // Ensure that the opmode is still active
+                if (opModeIsActive()) {
+
+                    // Determine new target position, and pass to motor controller
+                    newArmTarget = Terry.wobbleArmDrive.getCurrentPosition() + (int)(armInches * COUNTS_PER_INCH);
+
+                    Terry.wobbleArmDrive.setTargetPosition(newArmTarget);
+
+                    // reset the timeout time and start motion.
+                    runtime.reset();
+                    Terry.wobbleArmDrive.setPower(Math.abs(speed));
+
+                    while (opModeIsActive() && (Terry.wobbleArmDrive.isBusy()))
+                    {
+
+                        // Display it for the driver.
+                        telemetry.addData("TargetPos", "Running to %7d , newArmTarget");
+                        telemetry.addData("CurrentPos", "Running at %7d ",
+                                Terry.wobbleArmDrive.getCurrentPosition());
+
+                        telemetry.update();
+                    }
+
+                    Terry.wobbleArmDrive.setPower(0);
+
+                    Terry.wobbleArmDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                    // Turn On RUN_TO_POSITION
+                    Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
+            }
+
 
 
 
@@ -208,7 +265,7 @@ public class TerryTeleOp2021a extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
-           // telemetry.addData("Motors", "left (%.2f), right (%.2f)", Terry.leftDrive, Terry.rightDrive, /*armPower, */Terry.leftBackDrive, Terry.rightBackDrive);
+            // telemetry.addData("Motors", "left (%.2f), right (%.2f)", Terry.leftDrive, Terry.rightDrive, /*armPower, */Terry.leftBackDrive, Terry.rightBackDrive);
             /*telemetry.addData("Servo Position", "%5.2f", handPosition/*, wristPosition);*/
             //telemetry.update();
         }
