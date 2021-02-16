@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -59,6 +60,8 @@ public class TechbotHardware {
     public DcMotor leftBackDrive = null;
     public DcMotor rightBackDrive = null;
     public DcMotor wobbleArmDrive = null;
+    public DcMotor shooterDriveFront = null;
+    public DcMotor shooterDriveBack = null;
     //public DcMotor farm = null;
 
     // Touch sensors
@@ -69,6 +72,9 @@ public class TechbotHardware {
     //public Servo fervoL = null;
     //public Servo fervoR = null;
     public Servo wobbleClamp = null;
+    public Servo tubeSpin = null;
+    public Servo liftSpin = null;
+
 
     public ElapsedTime runtime;
     //public Servo servoWrist = null;
@@ -240,18 +246,25 @@ public class TechbotHardware {
         leftBackDrive = hwMap.get(DcMotor.class, "Left back motor");
         rightBackDrive = hwMap.get(DcMotor.class, "Right back motor");
         wobbleArmDrive = hwMap.get(DcMotor.class,"wobbleArm");
-        //farm = hwMap.get(DcMotor.class, "foundation motor");
-        //servoHand = hwMap.get(Servo.class, "hand");
+        shooterDriveFront = hwMap.get(DcMotor.class, "shooterArmFront");
+        shooterDriveBack = hwMap.get(DcMotor.class, "shooterArmBack");
+
+
         touchSensor1 = hwMap.touchSensor.get("touchSensor1");
         touchSensor2 = hwMap.touchSensor.get("touchSensor2");
+
+
         wobbleClamp = hwMap.get(Servo.class,"wobbleClamp");
+        tubeSpin = hwMap.get(Servo.class,"tubeSpin");
+        liftSpin = hwMap.get(Servo.class,"liftSpin");
 
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
         wobbleArmDrive.setDirection(DcMotor.Direction.FORWARD);
-        //farm.setDirection(DcMotor.Direction.FORWARD);
+        shooterDriveFront.setDirection(DcMotor.Direction.FORWARD);
+        shooterDriveBack.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
      /*   leftDrive.setPower(0);
@@ -260,24 +273,9 @@ public class TechbotHardware {
         rightBackDrive.setPower(0);
         farm.setPower(0);*/
 
-
-        /*
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-*/
-        // Define and initialize ALL installed servos.
-        //servoHand  = hwMap.get(Servo.class, "hand");
-        //servoWrist = hwMap.get(Servo.class, "wrist");
-       // servoHand.setPosition(0);
-       // fervoL = hwMap.get(Servo.class, "fervoL");
-       // fervoR = hwMap.get(Servo.class, "fervoR");
-       // fervoL.setPosition(MID_SERVO);
-       // fervoR.setPosition(MID_SERVO);
-        //servoWrist.setPosition(MID_SERVO);
         wobbleClamp.setPosition(MID_SERVO);
+        tubeSpin.setPosition(MID_SERVO);
+        liftSpin.setPosition(0);
     }
  }
 
