@@ -58,6 +58,7 @@ public class TerryTeleOp2021a extends LinearOpMode {
     // Declare OpMode members.
     private TechbotHardware Terry = new TechbotHardware();
     private ElapsedTime runtime = new ElapsedTime();
+    private boolean isDown = false;
 
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // eg: TETRIX Motor Encoder - 1440
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -139,7 +140,7 @@ public class TerryTeleOp2021a extends LinearOpMode {
 
 
             if (gamepad2.a == true) {
-                Terry.tubeSpin.setPosition(1);
+                Terry.tubeSpin.setPosition(-1);
             }
             else {
                 Terry.tubeSpin.setPosition(0.5);
@@ -147,10 +148,10 @@ public class TerryTeleOp2021a extends LinearOpMode {
 
 
             if (gamepad2.dpad_up) {
-                Terry.liftSpin.setPosition(0);
+                Terry.liftSpin.setPosition(1);
             }
             else {
-                Terry.liftSpin.setPosition(1);
+                Terry.liftSpin.setPosition(0);
             }
 
 
@@ -184,11 +185,8 @@ public class TerryTeleOp2021a extends LinearOpMode {
             Terry.leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             Terry.rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-
-
-            if (gamepad2.left_stick_y > 0.2) {
+            /*if (gamepad2.left_stick_y > 0.2) {
                 Terry.wobbleArmDrive.setPower(0.5);
             } else if (gamepad2.left_stick_y < 0.2 && gamepad2.left_stick_y > -0.2) {
                 Terry.wobbleArmDrive.setPower(0);
@@ -198,7 +196,7 @@ public class TerryTeleOp2021a extends LinearOpMode {
                 Terry.wobbleArmDrive.setPower(-0.5);
             } else if (gamepad2.left_stick_y < 0.2 && gamepad2.left_stick_y > -0.2) {
                 Terry.wobbleArmDrive.setPower(0);
-            }
+            } */
 
 
 
@@ -211,16 +209,18 @@ public class TerryTeleOp2021a extends LinearOpMode {
             }
 
 
-            if (gamepad2.dpad_down == true) {
-                encoderDrive(wobbleDrive / 2, 5);
-                //Terry.wobbleArmDrive.setTargetPosition(5);
+            if (gamepad2.x && !isDown) {
+                encoderDrive(wobbleDrive, 1);
+                isDown = true;
                 Terry.wobbleClamp.setPosition(0);
-            } else {
-                encoderDrive(wobbleDrive / 2, -5);
-                //Terry.wobbleArmDrive.setTargetPosition(0);
+            } else if (!gamepad2.x && isDown){
                 Terry.wobbleClamp.setPosition(1);
+                encoderDrive(wobbleDrive, -1);
+                isDown = false;
             }
-
+            telemetry.addData("Arm Down: ", isDown);
+            telemetry.addData("wobble drive position: ", Terry.wobbleArmDrive.getCurrentPosition());
+            telemetry.update();
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -229,9 +229,11 @@ public class TerryTeleOp2021a extends LinearOpMode {
             //telemetry.update();
         }
     }
+
     public void encoderDrive(double speed, double armInches) {
         int newArmTarget;
-
+        telemetry.addData("Start moving to position: ", "down");
+        telemetry.update();
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
@@ -244,6 +246,9 @@ public class TerryTeleOp2021a extends LinearOpMode {
             runtime.reset();
             Terry.wobbleArmDrive.setPower(Math.abs(speed));
 
+            // Turn On RUN_TO_POSITION
+            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
             while (opModeIsActive() && (Terry.wobbleArmDrive.isBusy()))
             {
 
@@ -251,7 +256,6 @@ public class TerryTeleOp2021a extends LinearOpMode {
                 telemetry.addData("TargetPos", "Running to %7d , newArmTarget");
                 telemetry.addData("CurrentPos", "Running at %7d ",
                         Terry.wobbleArmDrive.getCurrentPosition());
-
                 telemetry.update();
             }
 
@@ -260,9 +264,6 @@ public class TerryTeleOp2021a extends LinearOpMode {
             Terry.wobbleArmDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            // Turn On RUN_TO_POSITION
-            Terry.wobbleArmDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
     }
 }
