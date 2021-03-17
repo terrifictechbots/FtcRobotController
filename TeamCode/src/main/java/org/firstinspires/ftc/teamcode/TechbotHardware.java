@@ -62,11 +62,11 @@ public class TechbotHardware {
     public DcMotor wobbleArmDrive = null;
     public DcMotor shooterDriveFront = null;
     public DcMotor shooterDriveBack = null;
+    public DcMotor conveyorDrive = null;
     //public DcMotor farm = null;
 
     // Touch sensors
     public TouchSensor touchSensor1 = null;
-    public TouchSensor touchSensor2 = null;
 
     //public Servo servoHand = null;
     //public Servo fervoL = null;
@@ -190,26 +190,9 @@ public class TechbotHardware {
         rightBackDrive.setPower(spinDrive);
     }
 
-    /*public void drag(double dragDrive){
-        fervoL.setPosition(MID_SERVO);
-        fervoR.setPosition(MID_SERVO);
-
-        fervoL.setPosition(dragDrive);
-        fervoR.setPosition(dragDrive);
-    }
-    */
-
     public void stop() {
         this.drive(0);
     }
-      /*  double power = 0.0;
-
-        leftDrive.setPower(power);
-        rightDrive.setPower(power);
-        leftBackDrive.setPower(power);
-        rightBackDrive.setPower(power);
-    }
-    */
 
 
     public void chill(double chillTime) {
@@ -248,15 +231,14 @@ public class TechbotHardware {
         wobbleArmDrive = hwMap.get(DcMotor.class,"wobbleArm");
         shooterDriveFront = hwMap.get(DcMotor.class, "shooterArmFront");
         shooterDriveBack = hwMap.get(DcMotor.class, "shooterArmBack");
-
+        conveyorDrive = hwMap.get(DcMotor.class, "conveyor");
 
         touchSensor1 = hwMap.touchSensor.get("touchSensor1");
-        touchSensor2 = hwMap.touchSensor.get("touchSensor2");
-
 
         wobbleClamp = hwMap.get(Servo.class,"wobbleClamp");
         tubeSpin = hwMap.get(Servo.class,"tubeSpin");
         liftSpin = hwMap.get(Servo.class,"liftSpin");
+
 
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -265,13 +247,7 @@ public class TechbotHardware {
         wobbleArmDrive.setDirection(DcMotor.Direction.FORWARD);
         shooterDriveFront.setDirection(DcMotor.Direction.FORWARD);
         shooterDriveBack.setDirection(DcMotor.Direction.FORWARD);
-
-        // Set all motors to zero power
-     /*   leftDrive.setPower(0);
-        rightDrive.setPower(0);
-        leftBackDrive.setPower(0);
-        rightBackDrive.setPower(0);
-        farm.setPower(0);*/
+        conveyorDrive.setDirection(DcMotor.Direction.FORWARD);
 
         wobbleClamp.setPosition(MID_SERVO);
         tubeSpin.setPosition(MID_SERVO);
