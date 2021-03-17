@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -66,7 +67,7 @@ public class TechbotHardware {
     //public DcMotor farm = null;
 
     // Touch sensors
-    public TouchSensor touchSensor1 = null;
+    public DigitalChannel touchSensor1 = null;
 
     //public Servo servoHand = null;
     //public Servo fervoL = null;
@@ -233,7 +234,7 @@ public class TechbotHardware {
         shooterDriveBack = hwMap.get(DcMotor.class, "shooterArmBack");
         conveyorDrive = hwMap.get(DcMotor.class, "conveyor");
 
-        touchSensor1 = hwMap.touchSensor.get("touchSensor1");
+        touchSensor1 = hwMap.get(DigitalChannel.class, "touchSensor1");
 
         wobbleClamp = hwMap.get(Servo.class,"wobbleClamp");
         tubeSpin = hwMap.get(Servo.class,"tubeSpin");
