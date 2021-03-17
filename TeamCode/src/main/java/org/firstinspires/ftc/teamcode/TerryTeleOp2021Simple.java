@@ -59,7 +59,7 @@ public class TerryTeleOp2021Simple extends LinearOpMode {
     private TechbotHardware Terry = new TechbotHardware();
     private ElapsedTime runtime = new ElapsedTime();
 
-    DigitalChannel digitalTouch;  // Hardware Device Object
+    DigitalChannel touchSensor1;  // Hardware Device Object
 
     @Override
     public void runOpMode() {
@@ -77,10 +77,10 @@ public class TerryTeleOp2021Simple extends LinearOpMode {
         // Send telemetry message to signify Terry waiting;
 
         // get a reference to our digitalTouch object.
-        digitalTouch = hardwareMap.get(DigitalChannel.class, "touchSensor1");
+        touchSensor1 = hardwareMap.get(DigitalChannel.class, "touchSensor1");
 
         // set the digital channel to input.
-        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
+        touchSensor1.setMode(DigitalChannel.Mode.INPUT);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -112,7 +112,7 @@ public class TerryTeleOp2021Simple extends LinearOpMode {
 
             // send the info back to driver station using telemetry function.
             // if the digital channel returns true it's HIGH and the button is unpressed.
-            if (digitalTouch.getState() == true) {
+            if (touchSensor1.getState() == true) {
                 telemetry.addData("Digital Touch", "Is Not Pressed");
             } else {
                 telemetry.addData("Digital Touch", "Is Pressed");

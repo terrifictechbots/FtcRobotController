@@ -250,6 +250,8 @@ public class TechbotHardware {
         shooterDriveBack.setDirection(DcMotor.Direction.FORWARD);
         conveyorDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        touchSensor1.setMode(DigitalChannel.Mode.INPUT);
+
         wobbleClamp.setPosition(MID_SERVO);
         tubeSpin.setPosition(MID_SERVO);
         liftSpin.setPosition(1);
